@@ -4,4 +4,4 @@ crewai-tools
 python-dotenv
 langchain-community
 
-pip install 'crewai[google-genai]'
+
