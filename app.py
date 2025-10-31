@@ -17,7 +17,6 @@ def main():
     st.title("✈️ AI Travel Itinerary Generator")
     st.markdown("Enter your travel details below to generate a comprehensive itinerary, powered by Gemini and CrewAI.")
 
-    # --- User Input Section ---
     with st.form("itinerary_form"):
         st.header("Trip Details")
         
@@ -38,15 +37,13 @@ def main():
         
         submitted = st.form_submit_button("Generate Itinerary 🚀")
 
-    # --- Generation and Output Section ---
     if submitted:
         if not destination or not interests_input:
             st.error("Please fill in both the **destination** and **interests** fields.")
             return
 
         interests_list = [i.strip() for i in interests_input.split(',') if i.strip()]
-        
-        # Display Loading State
+
         with st.spinner("The AI Agents are collaborating to generate your itinerary..."):
             try:
                 # Call your CrewAI logic
@@ -57,24 +54,21 @@ def main():
                     travelers=travelers,
                     interests=interests_list
                 )
-                
-                # --- Display Result (Show Facility) ---
+              
                 st.success("Itinerary successfully generated!")
                 st.subheader("Your Detailed Travel Itinerary")
-                # Use st.code to display plain text output, st.markdown for markdown formatting
+               
                 st.markdown(final_output) 
-                
-                # --- File Download Feature (Download Facility) ---
+              
                 st.markdown("---")
                 st.subheader("Download Artifacts")
                 
                 output_files = ['research.md', 'Planing.md', 'budget.md']
-                
-                # Use columns to make download buttons look neat
+             
                 download_cols = st.columns(len(output_files)) 
                 
                 for i, file_name in enumerate(output_files):
-                    # Construct the full file path from the project root
+                  
                     file_path = os.path.join(PROJECT_ROOT, file_name)
                     
                     try:
@@ -96,7 +90,7 @@ def main():
 
             except Exception as e:
                 st.error("An error occurred during crew execution. Please check the terminal for details (rate limits, API keys, etc.).")
-                st.exception(e) # Display the full error in the UI for debug
+                st.exception(e)
 
 
 if __name__ == "__main__":

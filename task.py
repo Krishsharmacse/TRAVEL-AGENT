@@ -3,8 +3,7 @@ from agent import research_agent, planning_agent, budget_agent
 from tools import serper_tool
 
 def create_itinerary(destination: str, duration: int, budget: float, travelers: int, interests: list[str]):
-    
-    # --- Minimized Research Task ---
+   
     research_task = Task(
         description=(
             f"""Thoroughly research {destination} for a {duration}-day trip focusing on {', '.join(interests)} interests. 
@@ -17,7 +16,6 @@ def create_itinerary(destination: str, duration: int, budget: float, travelers: 
         output_file='research.md',
     )
       
-    # --- Minimized Planning Task ---
     planning_task = Task(
         description=(
             f"""Create a detailed, realistic {duration}-day itinerary for {destination} for {travelers} travelers. 
@@ -30,8 +28,7 @@ def create_itinerary(destination: str, duration: int, budget: float, travelers: 
     
         output_file='Planing.md',
     )
-      
-    # --- Minimized Budget Task ---
+     
     budget_task = Task(
         description=(
             f"""Analyze and optimize the provided itinerary for a maximum total budget of ${budget}. 

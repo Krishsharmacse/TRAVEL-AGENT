@@ -1,6 +1,4 @@
 
-from datetime import datetime, timedelta
-from typing import Dict, List
 from langchain_openai import ChatOpenAI
 from crewai import Agent, Task, Crew, Process, LLM
 from dotenv import load_dotenv
@@ -40,8 +38,7 @@ planning_agent = Agent(
             verbose=True,
              tools=[serper_tool]
         )
-        
-        # Budget Agent
+   
 budget_agent = Agent(
             role="Budget Optimization Expert",
             goal="Ensure travel plans are financially feasible and provide best value",
