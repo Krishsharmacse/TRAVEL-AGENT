@@ -3,5 +3,4 @@ crewai
 crewai-tools
 python-dotenv
 langchain-community
-# Add the specific dependency for Gemini, as you are using Google models:
 google-genai
