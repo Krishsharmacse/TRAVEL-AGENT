@@ -1,12 +1,11 @@
 
-import json
 from datetime import datetime, timedelta
 from typing import Dict, List
 from langchain_openai import ChatOpenAI
 from crewai import Agent, Task, Crew, Process, LLM
 from dotenv import load_dotenv
 import os
-from backend.tools import serper_tool
+from tools import serper_tool
 
 load_dotenv()
 
@@ -16,10 +15,7 @@ llm = LLM(
     model="gemini/gemini-2.0-flash", 
     verbose=True,
     temperature=0.5,
-    api_key=GEMINI_KEY ,
-    max_retries=5,          
-    request_timeout=30,   
-    delay_between_retries=5 
+    api_key=GEMINI_KEY 
 )
 
     

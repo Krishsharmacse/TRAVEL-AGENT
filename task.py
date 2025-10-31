@@ -1,6 +1,6 @@
 from crewai import Task
-from backend.agent import research_agent, planning_agent, budget_agent
-from backend.tools import serper_tool
+from agent import research_agent, planning_agent, budget_agent
+from tools import serper_tool
 
 def create_itinerary(destination: str, duration: int, budget: float, travelers: int, interests: list[str]):
     

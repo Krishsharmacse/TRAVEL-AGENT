@@ -1,7 +1,7 @@
 # crew.py
 from crewai import Crew, Process
-from backend.agent import research_agent, planning_agent, budget_agent
-from backend.task import create_itinerary
+from agent import research_agent, planning_agent, budget_agent
+from task import create_itinerary
 
 
 def run_travel_itinerary(destination: str, duration: int, budget: float, travelers: int, interests: list[str]):

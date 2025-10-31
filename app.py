@@ -2,13 +2,11 @@ import streamlit as st
 import os
 import sys
 
-# Add the project root to the Python path to allow absolute imports like backend.crew
-# This ensures that 'from backend.crew import run_travel_itinerary' works.
 PROJECT_ROOT = os.path.dirname(__file__)
 sys.path.append(PROJECT_ROOT)
 
 try:
-    from backend.crew import run_travel_itinerary
+    from crew import run_travel_itinerary
 except ImportError as e:
     st.error(f"Error loading crew module. Ensure backend/crew.py exists and uses absolute imports. Details: {e}")
     st.stop()
