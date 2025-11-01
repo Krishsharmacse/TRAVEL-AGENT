@@ -4,3 +4,4 @@ crewai-tools
 python-dotenv
 langchain-community
 google-genai
+langchain-openai
