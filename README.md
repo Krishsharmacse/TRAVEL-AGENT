@@ -27,4 +27,4 @@ Detailed Daily Schedules: With timing, costs, and tips
 Budget Breakdown: Daily and total cost summaries
 
 Downloadable Plans: Export itineraries as text files
-https://travel-agent-2-rqrn.onrender.com/
+https://travel-agent-eiedni3xmfn7ycbmbydbir.streamlit.app/
