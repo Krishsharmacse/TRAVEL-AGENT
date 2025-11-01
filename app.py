@@ -1,11 +1,18 @@
 import streamlit as st
+import os
 from chatbot import generate_response
 
+# Set page config as first command
 st.set_page_config(
     page_title="AI Travel Planner",
     page_icon="✈️",
     layout="wide"
 )
+
+# Check for API key
+if not os.getenv("GEMINI_API_KEY"):
+    st.error("⚠️ GEMINI_API_KEY not found. Please set it in your environment variables.")
+    st.stop()
 
 st.markdown("""
 <style>
@@ -79,12 +86,13 @@ with col1:
         if submitted and user_input:
             st.session_state.conversation.append(("user", user_input))
             
-            response, trip_details = generate_response(user_input)
-            st.session_state.conversation.append(("bot", response))
-            
-            if trip_details:
-                st.session_state.trip_details = trip_details
-                st.session_state.itinerary_text = f"""Travel Itinerary for {trip_details['destination']}
+            with st.spinner("🔄 Creating your itinerary..."):
+                response, trip_details = generate_response(user_input)
+                st.session_state.conversation.append(("bot", response))
+                
+                if trip_details:
+                    st.session_state.trip_details = trip_details
+                    st.session_state.itinerary_text = f"""Travel Itinerary for {trip_details['destination']}
 Duration: {trip_details['duration']} days
 Budget: ${trip_details['budget']}
 Travelers: {trip_details['travelers']} people
@@ -94,7 +102,6 @@ Interests: {', '.join(trip_details['interests'])}
             
             st.rerun()
 
-    # Download button outside the form
     if st.session_state.trip_details and st.session_state.itinerary_text:
         st.download_button(
             label="📥 Download Itinerary",
@@ -124,12 +131,13 @@ with col2:
             user_message = f"I want to visit {destination} for {duration} days with ${budget} budget for {travelers} people interested in {', '.join(interests)}"
             st.session_state.conversation.append(("user", user_message))
             
-            response, trip_details = generate_response(user_message)
-            st.session_state.conversation.append(("bot", response))
-            
-            if trip_details:
-                st.session_state.trip_details = trip_details
-                st.session_state.itinerary_text = f"""Travel Itinerary for {trip_details['destination']}
+            with st.spinner("🔄 Creating your itinerary..."):
+                response, trip_details = generate_response(user_message)
+                st.session_state.conversation.append(("bot", response))
+                
+                if trip_details:
+                    st.session_state.trip_details = trip_details
+                    st.session_state.itinerary_text = f"""Travel Itinerary for {trip_details['destination']}
 Duration: {trip_details['duration']} days
 Budget: ${trip_details['budget']}
 Travelers: {trip_details['travelers']} people
@@ -139,7 +147,6 @@ Interests: {', '.join(trip_details['interests'])}
             
             st.rerun()
 
-    # Download button for quick form outside the form
     if st.session_state.trip_details and st.session_state.itinerary_text:
         st.download_button(
             label="📥 Download Itinerary (Quick Form)",
