@@ -1,97 +1,150 @@
 import streamlit as st
-import os
-import sys
+from chatbot import generate_response
 
-PROJECT_ROOT = os.path.dirname(__file__)
-sys.path.append(PROJECT_ROOT)
+st.set_page_config(
+    page_title="AI Travel Planner",
+    page_icon="✈️",
+    layout="wide"
+)
 
-try:
-    from crew import run_travel_itinerary
-except ImportError as e:
-    st.error(f"Error loading crew module. Ensure backend/crew.py exists and uses absolute imports. Details: {e}")
-    st.stop()
+st.markdown("""
+<style>
+.main-header {
+    font-size: 3rem;
+    color: #1f77b4;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+.user-message {
+    background-color: #d1ecf1;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px 0;
+}
+.bot-message {
+    background-color: #e8f4f8;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px 0;
+}
+</style>
+""", unsafe_allow_html=True)
 
+st.markdown('<h1 class="main-header">✈️ AI Travel Itinerary Planner</h1>', unsafe_allow_html=True)
 
-def main():
-    st.set_page_config(page_title="✈️ AI Travel Itinerary Generator", layout="wide")
-    st.title("✈️ AI Travel Itinerary Generator")
-    st.markdown("Enter your travel details below to generate a comprehensive itinerary, powered by Gemini and CrewAI.")
+if 'conversation' not in st.session_state:
+    st.session_state.conversation = []
 
-    with st.form("itinerary_form"):
-        st.header("Trip Details")
+if 'trip_details' not in st.session_state:
+    st.session_state.trip_details = None
+
+if 'itinerary_text' not in st.session_state:
+    st.session_state.itinerary_text = ""
+
+with st.sidebar:
+    st.header("Quick Start Examples 🚀")
+    
+    example1 = st.button("Tokyo: 7 days, $3000, 2 people")
+    example2 = st.button("Paris: 5 days, $2000, 2 people")
+    example3 = st.button("Bali: 10 days, $5000, 4 people")
+    
+    if example1:
+        st.session_state.conversation.append(("user", "Plan a 7-day trip to Tokyo with $3000 budget for 2 people"))
+    if example2:
+        st.session_state.conversation.append(("user", "I want to visit Paris for 5 days with $2000"))
+    if example3:
+        st.session_state.conversation.append(("user", "Family vacation to Bali for 10 days, budget $5000"))
+    
+    if st.button("🔄 Start New Conversation"):
+        st.session_state.conversation = []
+        st.session_state.trip_details = None
+        st.session_state.itinerary_text = ""
+        st.rerun()
+
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    st.subheader("Chat with Travel Assistant 💬")
+    
+    for speaker, message in st.session_state.conversation:
+        if speaker == "user":
+            st.markdown(f'<div class="user-message"><b>You:</b> {message}</div>', unsafe_allow_html=True)
+        else:
+            st.markdown(f'<div class="bot-message"><b>Travel Assistant:</b> {message}</div>', unsafe_allow_html=True)
+    
+    with st.form("chat_form", clear_on_submit=True):
+        user_input = st.text_input("Type your message:", placeholder="e.g., I want to plan a trip to Japan for 10 days...")
+        submitted = st.form_submit_button("Send")
         
-        destination = st.text_input("Destination", placeholder="e.g., Tokyo, Japan")
+        if submitted and user_input:
+            st.session_state.conversation.append(("user", user_input))
+            
+            response, trip_details = generate_response(user_input)
+            st.session_state.conversation.append(("bot", response))
+            
+            if trip_details:
+                st.session_state.trip_details = trip_details
+                st.session_state.itinerary_text = f"""Travel Itinerary for {trip_details['destination']}
+Duration: {trip_details['duration']} days
+Budget: ${trip_details['budget']}
+Travelers: {trip_details['travelers']} people
+Interests: {', '.join(trip_details['interests'])}
+
+{response}"""
+            
+            st.rerun()
+
+    # Download button outside the form
+    if st.session_state.trip_details and st.session_state.itinerary_text:
+        st.download_button(
+            label="📥 Download Itinerary",
+            data=st.session_state.itinerary_text,
+            file_name=f"{st.session_state.trip_details['destination']}_itinerary.txt",
+            mime="text/plain"
+        )
+
+with col2:
+    st.subheader("Quick Planning Form 🎯")
+    
+    with st.form("quick_plan_form"):
+        destination = st.text_input("Destination 🌍", placeholder="e.g., Tokyo, Japan")
+        duration = st.number_input("Duration (days) 📅", min_value=1, max_value=30, value=7)
+        budget = st.number_input("Budget ($) 💰", min_value=100, max_value=10000, value=2000)
+        travelers = st.number_input("Number of Travelers 👥", min_value=1, max_value=10, value=2)
         
-        col1, col2 = st.columns(2)
-        with col1:
-            duration = st.number_input("Duration (days)", min_value=1, value=5)
-        with col2:
-            travelers = st.number_input("Number of Travelers", min_value=1, value=2)
-
-        col3, col4 = st.columns(2)
-        with col3:
-            budget = st.number_input("Maximum Budget ($)", min_value=100, value=2500, step=100)
-        with col4:
-            interests_input = st.text_input("Interests (comma-separated)", 
-                                            placeholder="e.g., historical sites, local cuisine, art")
+        interests = st.multiselect(
+            "Interests ❤️",
+            ["Culture", "Adventure", "Food", "Relaxation", "Shopping", "Nature"],
+            default=["Culture", "Food"]
+        )
         
-        submitted = st.form_submit_button("Generate Itinerary 🚀")
+        quick_submit = st.form_submit_button("Generate Itinerary 🚀")
+        
+        if quick_submit and destination:
+            user_message = f"I want to visit {destination} for {duration} days with ${budget} budget for {travelers} people interested in {', '.join(interests)}"
+            st.session_state.conversation.append(("user", user_message))
+            
+            response, trip_details = generate_response(user_message)
+            st.session_state.conversation.append(("bot", response))
+            
+            if trip_details:
+                st.session_state.trip_details = trip_details
+                st.session_state.itinerary_text = f"""Travel Itinerary for {trip_details['destination']}
+Duration: {trip_details['duration']} days
+Budget: ${trip_details['budget']}
+Travelers: {trip_details['travelers']} people
+Interests: {', '.join(trip_details['interests'])}
 
-    if submitted:
-        if not destination or not interests_input:
-            st.error("Please fill in both the **destination** and **interests** fields.")
-            return
+{response}"""
+            
+            st.rerun()
 
-        interests_list = [i.strip() for i in interests_input.split(',') if i.strip()]
-
-        with st.spinner("The AI Agents are collaborating to generate your itinerary..."):
-            try:
-                # Call your CrewAI logic
-                final_output = run_travel_itinerary(
-                    destination=destination,
-                    duration=duration,
-                    budget=budget,
-                    travelers=travelers,
-                    interests=interests_list
-                )
-              
-                st.success("Itinerary successfully generated!")
-                st.subheader("Your Detailed Travel Itinerary")
-               
-                st.markdown(final_output) 
-              
-                st.markdown("---")
-                st.subheader("Download Artifacts")
-                
-                output_files = ['research.md', 'Planing.md', 'budget.md']
-             
-                download_cols = st.columns(len(output_files)) 
-                
-                for i, file_name in enumerate(output_files):
-                  
-                    file_path = os.path.join(PROJECT_ROOT, file_name)
-                    
-                    try:
-                        with open(file_path, 'r', encoding='utf-8') as f:
-                            file_content = f.read()
-                        
-                        with download_cols[i]:
-                            st.download_button(
-                                label=f"Download {file_name}",
-                                data=file_content,
-                                file_name=file_name,
-                                mime="text/markdown",
-                                help=f"Downloads the detailed {file_name.replace('.md', ' report')}."
-                            )
-                    except FileNotFoundError:
-                        with download_cols[i]:
-                            st.warning(f"File '{file_name}' not found.")
-                            
-
-            except Exception as e:
-                st.error("An error occurred during crew execution. Please check the terminal for details (rate limits, API keys, etc.).")
-                st.exception(e)
-
-
-if __name__ == "__main__":
-    main()
+    # Download button for quick form outside the form
+    if st.session_state.trip_details and st.session_state.itinerary_text:
+        st.download_button(
+            label="📥 Download Itinerary (Quick Form)",
+            data=st.session_state.itinerary_text,
+            file_name=f"{st.session_state.trip_details['destination']}_itinerary.txt",
+            mime="text/plain",
+            key="download_quick"
+        )

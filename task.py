@@ -1,45 +1,33 @@
 from crewai import Task
-from agent import research_agent, planning_agent, budget_agent
-from tools import serper_tool
 
-def create_itinerary(destination: str, duration: int, budget: float, travelers: int, interests: list[str]):
-   
-    research_task = Task(
-        description=(
-            f"""Thoroughly research {destination} for a {duration}-day trip focusing on {', '.join(interests)} interests. 
-            Gather detailed, current information on: top attractions, best accommodation areas, local culture/customs, 
-            transportation options, dining/food scene, safety tips, and relevant events."""
-        ),
+def create_research_task(destination_info, destination, duration, travelers, interests, budget, research_agent):
+    return Task(
+        description=f"""Research {destination} using this search information:
+        
+        {destination_info}
+        
+        Duration: {duration} days
+        Travelers: {travelers} people
+        Interests: {', '.join(interests)}
+        Budget: ${budget}
+        
+        Analyze and extract key insights about attractions, culture, transportation, food, and safety.""",
         agent=research_agent,
-        expected_output="Comprehensive destination guide with all key information summarized.",
-      
-        output_file='research.md',
-    )
-      
-    planning_task = Task(
-        description=(
-            f"""Create a detailed, realistic {duration}-day itinerary for {destination} for {travelers} travelers. 
-            Ensure the schedule has a logical geographical flow, balances sightseeing with relaxation, and maximizes 
-            enjoyment based on the provided research context and {interests} interests."""
-        ),
-        agent=planning_agent,
-        expected_output=f"Detailed, day-by-day travel itinerary.",
-        context=[research_task],
-    
-        output_file='Planing.md',
-    )
-     
-    budget_task = Task(
-        description=(
-            f"""Analyze and optimize the provided itinerary for a maximum total budget of ${budget}. 
-            Provide a clear cost breakdown (accommodation, food, activities, transport), suggest cost-saving 
-            alternatives, and ensure the final plan is financially feasible."""
-        ),
-        agent=budget_agent,
-        expected_output="Budget analysis report with full cost breakdown and optimization tips.",
-        context=[planning_task],
-       
-        output_file='budget.md',
+        expected_output="Destination analysis with key insights"
     )
 
-    return research_task, planning_task, budget_task
+def create_planning_task(duration, destination, budget, travelers, interests, planning_agent, research_task):
+    return Task(
+        description=f"""Create a detailed {duration}-day itinerary for {destination}:
+        
+        Requirements:
+        - Duration: {duration} days
+        - Budget: ${budget} total
+        - Travelers: {travelers} people
+        - Interests: {', '.join(interests)}
+        
+        Include day-by-day schedule, logical flow, activity mix, and practical tips.""",
+        agent=planning_agent,
+        expected_output=f"Detailed {duration}-day itinerary with daily schedule",
+        context=[research_task]
+    )

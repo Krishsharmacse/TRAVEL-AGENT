@@ -1,49 +1,33 @@
-
 from langchain_openai import ChatOpenAI
-from crewai import Agent, Task, Crew, Process, LLM
-from dotenv import load_dotenv
+from crewai import Agent,LLM
 import os
-from tools import serper_tool
+from dotenv import load_dotenv
 
 load_dotenv()
 
 GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 
 llm = LLM(
-    model="gemini/gemini-2.0-flash", 
+    model="gemini/gemini-2.0-flash",
     verbose=True,
     temperature=0.5,
-    api_key=GEMINI_KEY 
+    api_key=GEMINI_KEY
 )
 
-    
+def create_research_agent():
+    return Agent(
+        role="Travel Research Expert",
+        goal="Gather detailed information about destinations using web search",
+        backstory="You are a travel researcher who finds current destination information.",
+        llm=llm,
+        verbose=True
+    )
 
-research_agent = Agent(
-            role="Travel Research Expert",
-            goal="Gather detailed information about destinations, attractions, and local insights",
-            backstory="You are a knowledgeable travel researcher with expertise in global destinations and local experiences.",
-            llm=llm,
-            verbose=True,
-            memory=True,
-            allow_delegation=True,
-            tools=[serper_tool],
-        )
-        
-        
-planning_agent = Agent(
-            role="Itinerary Planning Specialist", 
-            goal="Create optimized, realistic travel itineraries that maximize enjoyment and efficiency",
-            backstory="You are an experienced travel planner who creates perfect itineraries balancing activities, rest, and travel time.",
-            llm=llm,
-            verbose=True,
-             tools=[serper_tool]
-        )
-   
-budget_agent = Agent(
-            role="Budget Optimization Expert",
-            goal="Ensure travel plans are financially feasible and provide best value",
-            backstory="You specialize in travel budgeting and finding cost-effective solutions without compromising quality.",
-            llm=llm,
-            verbose=True,
-             tools=[serper_tool]
-        )
+def create_planning_agent():
+    return Agent(
+        role="Itinerary Planning Specialist",
+        goal="Create optimized travel itineraries",
+        backstory="You create practical travel itineraries balancing activities and rest.",
+        llm=llm,
+        verbose=True
+    )
